@@ -1,0 +1,84 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include <iomanip>
+#include <limits>
+using namespace std;
+struct Resultado {
+    double PMM;
+    double irradiancia;
+    double temperatura;
+};
+void leerArchivo(const string& nombreArchivo, vector<double>& tension, vector<double>& corriente){
+    ifstream archivo(nombreArchivo);
+    double V, I;
+    if(!archivo.is_open()){
+        cerr<<"Error al abrir el archivo "<<nombreArchivo<<endl;
+        return;
+    }
+    while(archivo>>V>>I){
+        tension.push_back(V);
+        corriente.push_back(I);
+    }
+    archivo.close();
+}
+//potencia
+void calcularPotencia(const vector<double>& tension, const vector<double>& corriente, vector<double>& potencia){
+    for (size_t i=0;i<tension.size();++i){
+        double P=tension[i]*corriente[i];
+        potencia.push_back(P);
+    }
+}
+//PMM
+double encontrarPMM(const vector<double>& potencia){
+    double PMM = numeric_limits<double>::lowest();
+    bool encontrado = false;
+    for (double P:potencia){
+        if(P>PMM){
+            PMM = P;
+            encontrado = true;
+        }
+    }
+    if (!encontrado) {
+        PMM = 0.0;  // PMM a 0 si no se encontro valor valido
+    }
+    return PMM;
+}
+int main(){
+    const string carpetaEntrada = "./archivos_entrada/";
+    const string archivoBinarioSalida = "resultados.bin";
+    vector<Resultado> resultados;
+    for (int temperatura = 25;temperatura<=75;temperatura += 10){
+        for(int irradiancia=100;irradiancia<=800;irradiancia+=100){
+            stringstream nombreArchivo;
+            nombreArchivo<<carpetaEntrada<<"OutputPV_T"<<temperatura<<"_G"<<irradiancia<<".txt";
+            vector<double> tension;
+            vector<double> corriente;
+            vector<double> potencia;
+            leerArchivo(nombreArchivo.str(), tension, corriente);
+            calcularPotencia(tension, corriente, potencia);
+            double PMM = encontrarPMM(potencia);
+
+            Resultado resultado;
+            resultado.PMM = PMM;
+            resultado.irradiancia = irradiancia;
+            resultado.temperatura = temperatura;
+            resultados.push_back(resultado);
+        }
+    }
+    ofstream archivoSalidaBinario(archivoBinarioSalida, ios::binary);
+    if(archivoSalidaBinario.is_open()){
+        archivoSalidaBinario.write(reinterpret_cast<char*>(resultados.data()), resultados.size() * sizeof(Resultado));
+        archivoSalidaBinario.close();
+    }else{
+        cerr<<"Error al abrir el archivo binario de salida"<<endl;
+    }
+    cout<<"Temperatura, Irradiancia, PMM"<<endl;
+    for(const Resultado& resultado : resultados){
+        cout<<resultado.temperatura<<",          "<<resultado.irradiancia <<",         "<<resultado.PMM<<endl;
+    }
+    return 0;
+}
