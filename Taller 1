@@ -1,148 +1,102 @@
 #include <iostream>
-#include <iomanip>
-#include <cmath>
 #include <fstream>
 #include <sstream>
-#include <stdlib.h>
+#include <vector>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
 
 using namespace std;
-const string rutaArchivo="estaturas.csv";
 
-struct Aula{
-  float aula1[20];
-  float aula2[20];
+struct Aula {
+    vector<float> estaturas;
 };
 
+Aula leerDatosDesdeArchivo(const string& rutaArchivo) {
+    ifstream archivo(rutaArchivo);
+    Aula aula;
+    string linea;
+    float valor;
 
-struct Aula leerDatosDesdeArchivo(const string& rutaArchivo){
-  ifstream archivo(rutaArchivo);
-  Aula miAula;
-  string linea;
-  int i = 0;
-  if(archivo.fail()){
-    cout<<"No se pudo abrir el archivo"<<endl;
-    exit(1);
-  }
-
-  getline(archivo, linea);
-
-  while (getline(archivo, linea)){
-    istringstream ss(linea);
-    string valor;
-
-    getline(ss,valor,',');
-    miAula.aula1[i] = stof(valor);
-
-    getline(ss,valor,',');
-    miAula.aula2[i] = stof(valor);
-    
-    i++;
-    
-  }
-  return miAula;
-  
-}
-
-int calcularNumIntervalos(int tamano){
-  int numIntervalos;
-  numIntervalos = ceil(1 + 3.3 * log10(tamano));
-  return numIntervalos;
-}
-
-
-
-void OrdenarDatos(float datos[], int tam){
-  float aux=0;
-  bool bandera = false;
-  while (!bandera){
-    bandera = true;
-    for(int i = 0; i < tam; i++){
-      if(datos[i] > datos[i+1]){
-        aux = datos[i];
-        datos[i] = datos[i+1];
-        datos[i+1] = aux;
-        bandera = false;
-      }
-    } 
-  }
-
-}
-  
-
-  
-/*void calcularCantIntervalos(struct Aula*Aula1, struct Aula*Aula2){
-  float intaula1;
-  float intaula2;
-
-  intaula1= Aula.aula1[19]-Aula.aula1[0];
-  intaula2= Aula.aula2[20]-Aula.aula2[0];
-} */
-
-
-float CalcRango(float aula[]){ 
-    float resaula;
-    resaula=aula[19]-aula[0];
-    return resaula;
-  }
-
-float anchoIntervalos(float rango, int numIntervalos){
-  float resultado;
-  resultado = rango/numIntervalos;
-  return resultado;
-}
-
-void MostrarTabFreq(float datos[], int tamano, int numIntervalos, float anchoIntervalo){
-  int columnas = 5;
-  int filas = numIntervalos;
-
-  cout << endl << endl;
-  cout << setw(5) << "Intervalo"
-       << setw(12) << "ni"
-       << setw(4) << "N1"
-       << setw(8) << "f1"
-       << setw(8) << "F1" << "/n";
-  
-  int aux1 = 0;
-  float f = 0;
-  string tabla1[filas][columnas];
-  float aux2 = datos[0];
-  float aux3 = aux2 + anchoIntervalo;
-
-  for (int j = 0; j < filas; j++){
-    int contador = 0;
-    tabla1[j][0] = to_string(aux2) + "_" + to_string(aux3);
-
-    for (int w=0; w < tamano; w++){
-      if (datos[w] >= aux2 && datos[w] <= aux3){
-       contador ++; 
-      }
+    if (archivo.fail()) {
+        cout << "No se pudo abrir el archivo" << endl;
+        exit(1);
     }
-    aux2 = aux3;
-    aux3 = aux2 + anchoIntervalo;
 
-    tabla1[j][1] = to_string(contador);
-    aux1 = aux1 + contador;
-    tabla1[j][2] = to_string(aux1);
-    float fi = cont * 0.05;
-    tabla1[j][3] = to_string(fi);
-    f = f1 + f;
-    tabla[j][4] = to_string(f);
-  }
-
-  for(int i = 0; i < filas; i++){
-    for(int j=0; j < columnas; j++){
-      cout << tabla1[i][j] << "/n";
+    while (getline(archivo, linea)) {
+        istringstream ss(linea);
+        ss >> valor;
+        aula.estaturas.push_back(valor);
     }
-    cout << endl;  
-  }
+    return aula;
 }
 
+void ordenarDatos(vector<float>& datos) {
+    sort(datos.begin(), datos.end());
+}
 
-int main(){
-  struct Aula miAula;
-  int tamano=20;
-  float ancho[2];
-  miAula=leerDatosDesdeArchivo(rutaArchivo);
-  OrdenarDatos();
-  CalcularAnchoIntervalo(tamano, miAula, ancho);
-};
+float calcularRango(const vector<float>& datos) {
+    return datos.back() - datos.front();
+}
+
+int calcularNumIntervalos(int tamano) {
+    return ceil(1 + 3.3 * log10(tamano));
+}
+
+float calcularAnchoIntervalo(float rango, int numIntervalos) {
+    return rango / numIntervalos;
+}
+
+void mostrarTablaFrecuencias(const vector<float>& datos, int numIntervalos, float anchoIntervalo) {
+    cout << setw(15) << "Intervalo" << setw(10) << "ni" << setw(10) << "Ni" << setw(10) << "fi" << setw(10) << "Fi" << endl;
+
+    int n = datos.size();
+    int Ni = 0;
+    float Fi = 0.0;
+
+    float lower = datos.front();
+    float upper = lower + anchoIntervalo;
+
+    for (int i = 0; i < numIntervalos; ++i) {
+        int ni = count_if(datos.begin(), datos.end(), [lower, upper](float x) { return x >= lower && x < upper; });
+        Ni += ni;
+        float fi = (float)ni / n;
+        Fi += fi;
+
+        cout << setw(7) << lower << " - " << setw(7) << upper << setw(10) << ni << setw(10) << Ni << setw(10) << fi << setw(10) << Fi << endl;
+
+        lower = upper;
+        upper += anchoIntervalo;
+    }
+}
+
+int main() {
+    string rutaArchivo = "estaturas.csv";
+
+    // Leer y ordenar los datos
+    Aula aula1 = leerDatosDesdeArchivo(rutaArchivo);
+    Aula aula2 = leerDatosDesdeArchivo(rutaArchivo);  // Suponiendo que ambos aulas tienen los mismos datos para simplificar
+    ordenarDatos(aula1.estaturas);
+    ordenarDatos(aula2.estaturas);
+
+    // Calcular el rango
+    float rangoAula1 = calcularRango(aula1.estaturas);
+    float rangoAula2 = calcularRango(aula2.estaturas);
+
+    // Calcular el número de intervalos
+    int numIntervalosAula1 = calcularNumIntervalos(aula1.estaturas.size());
+    int numIntervalosAula2 = calcularNumIntervalos(aula2.estaturas.size());
+
+    // Calcular el ancho del intervalo
+    float anchoIntervaloAula1 = calcularAnchoIntervalo(rangoAula1, numIntervalosAula1);
+    float anchoIntervaloAula2 = calcularAnchoIntervalo(rangoAula2, numIntervalosAula2);
+
+    // Mostrar la tabla de frecuencias
+    cout << "Tabla de frecuencias para el Aula 1:" << endl;
+    mostrarTablaFrecuencias(aula1.estaturas, numIntervalosAula1, anchoIntervaloAula1);
+
+    cout << "\nTabla de frecuencias para el Aula 2:" << endl;
+    mostrarTablaFrecuencias(aula2.estaturas, numIntervalosAula2, anchoIntervaloAula2);
+
+    return 0;
+}
