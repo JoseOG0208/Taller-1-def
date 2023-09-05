@@ -37,8 +37,8 @@ double findPMM(const vector<double>& power) {
 }
 
 int main() {
-    // Supongamos que tenemos 3 archivos para simplificar el ejemplo
-    vector<std::string> filenames = {"OutputPV_T25_G1000.txt", "OutputPV_T30_G900.txt", "OutputPV_T35_G1100.txt"};
+    // Supongamos que tenemos 3 archivos
+    vector<std::string> filenames = {"OutputPV_T15_G400.txt", "OutputPV_T15_G420.txt", "OutputPV_T15_G440.txt"};
 
     // Archivo de salida para almacenar los resultados
     ofstream outFile("PMM_results.txt");
