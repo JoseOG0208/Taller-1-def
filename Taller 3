@@ -1,0 +1,316 @@
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+double calculadoraDeLogaritmos(double x, double b);
+
+void invertirArreglo(string palabra);
+
+bool isPalindrome(const string &str);
+
+bool compararMatrices(int *matriz1, int *matriz2, int filas, int columnas);
+
+int calcularMCD(int a, int b);
+
+vector<int> descomponerEnPrimos(int numero);
+
+vector<int> descomponerMCD(vector<int>& descomposicionA, vector<int>& descomposicionB);
+
+double estimarPi(int numPoints);
+
+const int FILAS = 7;
+const int COLUMNAS = 7;
+
+int main() {
+
+
+  int opcion;
+  string palabra;
+  string input;
+  bool resultadoMatrices = false;
+  double estimatedPi = 0.0;
+  //int num1, num2;
+  int mcd = 0;
+  vector<int> descomposicionA;
+  vector<int> descomposicionB;
+  vector<int> descomposicionMCD;
+  
+  do{
+    cout << "\n-----Menu-----\n";
+    cout << "1. Calcular logaritmos \n";
+    cout << "2. Invertir Palabra \n";
+    cout << "3. Verificar si la palabra es palindrome \n";
+    cout << "4. Verificar si dos matrices son iguales \n";
+    cout << "5. Descomposicion de numeros primos \n";
+    cout << "6. Estimar el numero π \n";
+    cout << "7. Salir \n";
+    cin >> opcion;
+    cin.ignore();
+
+    switch (opcion){
+      
+      case 1: 
+      cout << "Vamos a calcular el resultado de dos logaritmos." << endl;
+        
+      int x, b;
+      cout << "Digite su primer numero: ";
+      cin >> x;
+    
+      cout << "Digite su segundo numero: ";
+      cin >> b;
+        
+      double resultado;
+      resultado = calculadoraDeLogaritmos(x,b);
+      cout << "El resultado de la operacion es: " << resultado << endl;
+
+      break;
+
+      case 2:
+      cout << "Vamos a invertir una palabra." << endl;
+
+      //string palabra;
+      cout <<"Ingrese su palabra a invertir: ";
+      cin >> palabra;
+
+      invertirArreglo(palabra);
+
+      break;
+
+      case 3:
+      cout << "Vamos a verificar si una palabra es palindrome: " << endl;
+
+      //string input;
+      cout << "Digite por favor su palabra: ";
+      cin >> input;
+
+      if (isPalindrome(input)) {
+        cout << "Es un palíndromo." << endl;
+        } 
+      else {
+        cout << "No es un palíndromo." << endl;
+      }
+        
+      break;
+
+      case 4: 
+      cout << "Vamos a comparar dos matrices y verificar si son iguales" << endl;
+
+      int matriz1[FILAS][COLUMNAS];
+      int matriz2[FILAS][COLUMNAS];
+
+      for(int i =0; i < FILAS; i++){
+        for(int j = 0; j < COLUMNAS; j++){
+          cout << "Digite el numero para la posicion: " << i << " " << j <<endl;
+          cin >> matriz1[i][j];
+        }
+      }
+      for(int i =0; i < FILAS; i++){
+        for(int j = 0; j < COLUMNAS; j++){
+          cout << "Digite el numero para la posicion: " << i << " " << j <<endl;
+          cin >> matriz2[i][j];
+        }
+      }
+
+      resultadoMatrices = compararMatrices(&matriz1[0][0], &matriz2[0][0], FILAS, COLUMNAS);
+      if (resultadoMatrices == true){
+        cout << "Las matrices son iguales" << endl;
+      }
+      else{
+        cout << "Las matrices son diferentes" << endl;
+      }
+
+      break;
+
+      case 5:
+      cout << "Vamos a descomponer en numeros primos un numero y vamos a calcular el maximo comun divisor" << endl;
+
+      int num1, num2;
+      cout << "Ingrese el primer numero: ";
+      cin >> num1;
+      cout << "Ingrese el sgundo numero: ";
+      cin >> num2;
+
+      mcd = calcularMCD(num1, num2);
+
+   
+      descomposicionA = descomponerEnPrimos(num1);
+      descomposicionB = descomponerEnPrimos(num2);
+          
+      descomposicionMCD = descomponerMCD(descomposicionA, descomposicionB);
+  
+      cout << "El MCD de " << num1 << " y " << num2 << " es: " << mcd << endl;
+      cout << "La descomposición en primos del MCD es: ";
+      for (int i = 0; i < descomposicionMCD.size(); i++) {
+          cout << descomposicionMCD[i];
+          if (i < descomposicionMCD.size() - 1) {
+              cout << " * ";
+          }
+      }
+      cout << endl;
+
+      break;
+
+      case 6: 
+      cout << "Vamos a estimar el numero π" << endl;
+
+      int numPoints;
+      cout << "Ingrese el número de puntos a generar: ";
+      cin >> numPoints;
+  
+      estimatedPi = estimarPi(numPoints);
+  
+      cout << "Estimación de pi después de " << numPoints << " puntos: " << estimatedPi << endl;
+      
+      break;
+
+      case 7: 
+      cout << "Hasta pronto \n";
+
+      break;
+
+      default:
+      cout << "Opcion invalida. Intente otra vez. \n";
+      
+      break;
+    }
+    
+  }while (opcion != 7);
+
+  return 0;
+  
+  
+
+  
+}
+
+double calculadoraDeLogaritmos(double x, double b){
+  double result = log(x)/ log(b);
+  return result;
+}
+
+/*void invertirArreglo(string palabra){
+  for(string::reverse_iterator palabrafinal=palabra.rbegin(); palabrafinal!=palabra.rend(); palabrafinal++){
+    cout << *palabrafinal;
+  }
+}¨*/
+void invertirArreglo(string palabra) {
+    for (string::reverse_iterator palabrafinal = palabra.rbegin(); palabrafinal != palabra.rend(); ++palabrafinal) {
+        cout << *palabrafinal;
+    }
+    cout << endl; // Agregamos un salto de línea para que la salida sea más legible
+}
+
+bool isPalindrome(const string &str) {
+
+    // Transformar la cadena a minúsculas y eliminar caracteres no alfabéticos
+    string cleanStr;
+    locale loc;
+    for (char c : str) {
+        if (isalpha(c, loc)) {
+            cleanStr += tolower(c, loc);
+        }
+    }
+
+    // Verificar si la cadena resultante es un palíndromo
+    int left = 0;
+    int right = cleanStr.length() - 1;
+    while (left < right) {
+        if (cleanStr[left] != cleanStr[right]) {
+            return false;
+        }
+        left++;
+        right--;
+    }
+    return true;
+}
+
+bool compararMatrices(int *matriz1, int *matriz2, int filas, int columnas){
+  for (int i=0; i < filas; i++){
+    for (int j = 0; j < columnas; j++){
+      if(*(matriz1 + i * columnas +j) != *(matriz2 + i * columnas +j)){
+        return false;
+      }
+    }
+  }
+  return true;  
+}
+
+int calcularMCD(int a, int b) {
+    if (b == 0) {
+        return a;
+    } else {
+        return calcularMCD(b, a % b);
+    }
+}
+
+
+vector<int> descomponerEnPrimos(int numero) {
+    vector<int> primos;
+    for (int i = 2; i <= numero; i++) {
+        while (numero % i == 0) {
+            primos.push_back(i);
+            numero /= i;
+        }
+    }
+    return primos;
+}
+
+
+vector<int> descomponerMCD(vector<int>& descomposicionA, vector<int>& descomposicionB) {
+    vector<int> mcd;
+    int i = 0, j = 0;
+
+    while (i < descomposicionA.size() && j < descomposicionB.size()) {
+        if (descomposicionA[i] == descomposicionB[j]) {
+            mcd.push_back(descomposicionA[i]);
+            i++;
+            j++;
+        } else if (descomposicionA[i] < descomposicionB[j]) {
+            mcd.push_back(descomposicionA[i]);
+            i++;
+        } else {
+            mcd.push_back(descomposicionB[j]);
+            j++;
+        }
+    }
+
+   
+    while (i < descomposicionA.size()) {
+        mcd.push_back(descomposicionA[i]);
+        i++;
+    }
+
+    while (j < descomposicionB.size()) {
+        mcd.push_back(descomposicionB[j]);
+        j++;
+    }
+
+    return mcd;
+}
+
+
+double estimarPi(int numPoints) {
+    srand(time(nullptr));
+
+    int pointsInsideCircle = 0;
+
+    for (int i = 0; i < numPoints; ++i) {
+        // Generar coordenadas aleatorias en el rango [-1, 1)
+        double x = -1 + (2.0 * rand() / RAND_MAX);
+        double y = -1 + (2.0 * rand() / RAND_MAX);
+
+        // Verificar si el punto está dentro del círculo (x^2 + y^2 <= 1)
+        if (x * x + y * y <= 1) {
+            pointsInsideCircle++;
+        }
+    }
+
+    // Calcular la estimación de pi utilizando la relación entre el área del círculo y el área del cuadrado
+    double estimatedPi = 4.0 * static_cast<double>(pointsInsideCircle) / numPoints;
+
+    return estimatedPi;
+}
